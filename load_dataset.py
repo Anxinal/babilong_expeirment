@@ -53,11 +53,12 @@ def load_tokenizer(name=TOKENIZER_NAME):
     return tokenizer
 
 
-def load_tasks(load, tasks, lengths, rows):
+def load_tasks(load, tasks, lengths, rows, preprocessor=None):
     """The Hub samples of *tasks* at *lengths* as one dataset, with a ``task`` column.
 
     *load* is ``load_training_babilong`` or ``load_babilong``; ``rows(n)`` picks the rows
-    to keep out of the ``n`` in each (task, length) file.
+    to keep out of the ``n`` in each (task, length) file. *preprocessor*, a
+    ``preprocess.Preprocessor``, rewrites ``input``, ``question`` and ``target`` of every row.
     """
     parts = []
     for task in tasks:
@@ -69,7 +70,10 @@ def load_tasks(load, tasks, lengths, rows):
                 continue
             ds = ds.select_columns(["input", "question", "target"]).select(rows(len(ds)))
             parts.append(ds.add_column("task", [task] * len(ds)))
-    return concatenate_datasets(parts)
+    samples = concatenate_datasets(parts)
+    if preprocessor is not None:
+        samples = samples.map(preprocessor, batched=True)
+    return samples
 
 
 def encode(batch, tokenizer, src_len):

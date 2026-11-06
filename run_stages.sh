@@ -60,10 +60,10 @@ MODE="${1:-slurm}"
 RUNS=(
     "alibi_masked_s${SEED}|--model alibi_masked"
     # "roformer_s${SEED}|--model roformer"
-    # "alibi_s${SEED}|--model alibi"
+    "alibi_s${SEED}|--model alibi"
     # "transformer_mask_penone_encB_s${SEED}|--model transformer_mask --encoder_mask B"
     # "transformer_mask_pesinusoidal_encB_s${SEED}|--model transformer_mask --encoder_mask B --pe sinusoidal"
-    # "transformer_mask_penone_encCCCCFFFF_s${SEED}|--model transformer_mask --encoder_mask CCCCFFFF"
+    "transformer_mask_penone_encCCCCFFFF_s${SEED}|--model transformer_mask --encoder_mask CCCCFFFF"
     # "transformer_mask_penone_encCCCCCCCC_s${SEED}|--model transformer_mask --encoder_mask CCCCCCCC"
 )
 

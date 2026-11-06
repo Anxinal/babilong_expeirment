@@ -44,6 +44,7 @@ from transformers import get_inverse_sqrt_schedule
 
 from load_dataset import (LENGTHS, TRAIN_LENGTHS, length_tokens, load_babilong, load_tasks,
                           load_tokenizer, load_training_babilong, make_loader)
+from preprocess import NameReplacemen
 from tmodel.models import MODEL_TYPES, PE_TYPES, build_model
 
 # The Hub's training set has qa1-qa10. Of those qa6 is left out, because kept tasks ask
@@ -91,7 +92,8 @@ def evaluate_lengths(args, model, criterion, tokenizer, tasks, device):
     results = {}
     for length in args.eval_lens:
         samples = load_tasks(load_babilong, tasks, [length],
-                             lambda n: range(min(n, args.eval_samples_per_task)))
+                             lambda n: range(min(n, args.eval_samples_per_task)),
+                             preprocessor=NameReplacemen())
         # Nothing is truncated here: the source is as long as the sample is.
         loader = make_loader(samples, tokenizer, args.eval_batch_size, args.workers,
                              src_len=max(length_tokens(length), args.src_len) + QUESTION_ROOM)
@@ -179,8 +181,9 @@ def main():
         # Validated at the training lengths, on the last rows of each training file.
         n_val, n_train = args.val_samples_per_task, args.samples_per_task
         train = load_tasks(load_training_babilong, tasks, args.train_len,
-                           lambda n: range(min(n - n_val, n_train or n)))
-        val = load_tasks(load_training_babilong, tasks, args.train_len, lambda n: range(n - n_val, n))
+                           lambda n: range(min(n - n_val, n_train or n)), preprocessor=NameReplacemen())
+        val = load_tasks(load_training_babilong, tasks, args.train_len, lambda n: range(n - n_val, n),
+                          preprocessor=NameReplacemen())
         train_loader = make_loader(train, tokenizer, args.batch_size, args.workers, args.src_len,
                                    shuffle=True)
         val_loader = make_loader(val, tokenizer, args.batch_size, args.workers, args.src_len)
